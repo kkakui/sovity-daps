@@ -15,7 +15,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     ports:
-      - 8080:8080
+      - 4567:8080
   postgres:
     image: docker.io/library/postgres:16
     restart: always

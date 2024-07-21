@@ -48,6 +48,7 @@ public class DatMapper extends AbstractOIDCProtocolMapper implements OIDCAccessT
     public static final String PROVIDER_ID = "dat-mapper";
 
     public static final String SUBJECT_CLAIM = "subject-claim";
+    public static final String PARTICIPANT_ID_CLAIM = "participant-id-claim";
     public static final String AUDIENCE_CLAIM = "audience-claim";
     private static final String DEFAULT_AUDIENCE = "idsc:IDS_CONNECTORS_ALL";
 
@@ -74,6 +75,13 @@ public class DatMapper extends AbstractOIDCProtocolMapper implements OIDCAccessT
         subjectProperty.setType(ProviderConfigProperty.STRING_TYPE);
         subjectProperty.setHelpText("Defaults to keycloak-client-id. Subject the requesting connector the token is created for. This is the connector requesting the DAT. The sub value must be the combined entry of the SKI and AKI of the IDS X509 as presented in Sec. 4.2.1. In this context, this is identical to iss.");
         configProperties.add(subjectProperty);
+
+        ProviderConfigProperty participantIdProperty = new ProviderConfigProperty();
+        participantIdProperty.setName(PARTICIPANT_ID_CLAIM);
+        participantIdProperty.setLabel("Participant ID");
+        participantIdProperty.setType(ProviderConfigProperty.STRING_TYPE);
+        participantIdProperty.setHelpText("TBD");
+        configProperties.add(participantIdProperty);
 
         ProviderConfigProperty audienceProperty = new ProviderConfigProperty();
         audienceProperty.setName(AUDIENCE_CLAIM);
@@ -159,7 +167,15 @@ public class DatMapper extends AbstractOIDCProtocolMapper implements OIDCAccessT
         }
         token.setSubject(subjectClaimValue);
 
-        String audienceClaimValue = mappingModel.getConfig().get(AUDIENCE_CLAIM);
+        String participantIdClaimValue = mappingModel.getConfig().get(PARTICIPANT_ID_CLAIM);
+        if (participantIdClaimValue != null) {
+            token.getOtherClaims().put("participant_id", participantIdClaimValue);
+        }
+
+        String audienceClaimValue = session.getContext().getHttpRequest().getDecodedFormParameters().getFirst("resource");
+        if (audienceClaimValue == null) {
+            audienceClaimValue = mappingModel.getConfig().get(AUDIENCE_CLAIM);
+        }
         if (audienceClaimValue != null) {
             token.audience(audienceClaimValue);
         }
